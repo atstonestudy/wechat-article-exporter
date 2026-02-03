@@ -542,6 +542,7 @@ function copyWechatLink() {
               { label: 'Txt', event: 'export-article-text' },
               { label: 'Markdown', event: 'export-article-markdown' },
               { label: 'Word (内测中)', event: 'export-article-word' },
+              { label: '导出到扣子知识库', event: 'export-coze' }, // 新增扣子导出选项
               // { label: 'PDF (计划中)', event: 'export-article-pdf', disabled: true },
             ]"
             @export-article-excel="exportFile('excel', selectedArticleUrls)"
@@ -550,6 +551,7 @@ function copyWechatLink() {
             @export-article-text="exportFile('text', selectedArticleUrls)"
             @export-article-markdown="exportFile('markdown', selectedArticleUrls)"
             @export-article-word="exportFile('word', selectedArticleUrls)"
+            @export-coze="exportFile('coze', selectedArticleUrls)"
           >
             <UButton
               :loading="exportBtnLoading"

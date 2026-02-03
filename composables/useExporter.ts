@@ -3,6 +3,7 @@ import toastFactory from '~/composables/toast';
 import { Exporter } from '~/utils/download/Exporter';
 import type { ExporterStatus } from '~/utils/download/types';
 
+
 export default () => {
   const toast = toastFactory();
 
@@ -240,7 +241,45 @@ export default () => {
   // 导出 pdf
   async function export2pdf(urls: string[]) {}
 
-  function exportFile(type: 'excel' | 'json' | 'html' | 'text' | 'markdown' | 'word' | 'pdf', urls: string[]) {
+
+  // 导出 coze
+  async function export2coze(urls: string[]) {
+    if (urls.length === 0) {
+      toast.warning('提示', '请先选择文章');
+      return;
+    }
+
+    const manager = new Exporter(urls);
+    manager.on('export:begin', () => {
+      phase.value = '资源解析中';
+      completed_count.value = 0;
+      total_count.value = 0;
+    });
+    manager.on('export:total', (total: number) => {
+      phase.value = '导出中';
+      completed_count.value = 0;
+      total_count.value = total;
+    });
+    manager.on('export:progress', (index: number) => {
+      completed_count.value = index;
+    });
+    manager.on('export:finish', (seconds: number) => {
+      console.debug('耗时:', formatElapsedTime(seconds));
+      toast.success('coze 导出完成', `本次导出耗时 ${formatElapsedTime(seconds)}`);
+    });
+
+    try {
+      loading.value = true;
+      await manager.startExport('coze');
+    } catch (error) {
+      console.error('导出任务失败:', error);
+      alert((error as Error).message);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function exportFile(type: 'excel' | 'json' | 'html' | 'text' | 'markdown' | 'word' | 'pdf'|'coze', urls: string[]) {
     switch (type) {
       case 'excel':
         return export2excel(urls);
@@ -256,6 +295,8 @@ export default () => {
         return export2word(urls);
       case 'pdf':
         return export2pdf(urls);
+      case 'coze':
+        return export2coze(urls);
     }
   }
 

@@ -40,6 +40,11 @@ interface ExportConfig {
 
   // 导出html中是否包含评论
   exportHtmlIncludeComments: boolean;
+
+  // coze api secret
+  cozeApiKey: string;
+  // coze knowledge id
+  cozeKbId: string;
 }
 
 interface DownloadConfig {

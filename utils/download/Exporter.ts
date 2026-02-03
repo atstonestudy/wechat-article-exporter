@@ -14,9 +14,13 @@ import { getArticleComments, renderComments } from '~/utils/comment';
 import { BaseDownloader } from '~/utils/download/BaseDownloader';
 import { type ExcelExportEntity, export2ExcelFile, export2JsonFile } from '~/utils/exporter';
 import type { DownloadOptions } from './types';
+import type { AnyRecord } from 'node:dns';
+import { uploadToCozeKb, checkCozeConfig } from '~/utils/coze-kb';
+
+
 
 // 导出类型
-type ExportType = 'excel' | 'json' | 'html' | 'txt' | 'markdown' | 'word' | 'pdf';
+type ExportType = 'excel' | 'json' | 'html' | 'txt' | 'markdown' | 'word' | 'pdf' | 'coze';
 
 const preferences: Ref<Preferences> = usePreferences() as unknown as Ref<Preferences>;
 
@@ -79,6 +83,8 @@ export class Exporter extends BaseDownloader {
         await this.exportMarkdownFiles();
       } else if (this.exportType === 'pdf') {
         await this.exportPdfFiles();
+      } else if (this.exportType === 'coze'){
+        await this.exportToCoze();
       }
     } finally {
       this.isRunning = false;
@@ -86,6 +92,47 @@ export class Exporter extends BaseDownloader {
       this.emit('export:finish', elapse);
       this.cancelAllPending();
     }
+  }
+  
+  private async exportToCoze() {
+    const cozeConfig = (preferences.value as Preferences).exportConfig || {};
+    if (!checkCozeConfig(cozeConfig)) {
+      throw new Error('coze配置无效！')
+      return;
+    }
+    const cozeApiKey = cozeConfig.cozeApiKey;
+    // const cozeApiKey = "sat_af9YNYNcvgRjJ6K8zUzhBnck6EBIGShpDcI0PeEX5keFy715zkKntRce1NL0Ttzg"
+    const cozeKbId = cozeConfig.cozeApiKey;
+    // const cozeKbId = '7600014169656311844'
+    const total = this.urls.length;
+    this.emit('export:total', total);
+    
+    const parser = new DOMParser();
+    for (let i = 0; i < total; i++) {
+      const url = this.urls[i];
+
+      const filename = await this.exportDirName(url);
+      console.log(`(${i + 1}/${total})开始导出: ${filename}(${url})`);
+
+      const content = await this.getPureContent(url, 'html', parser);
+      if (!content) {
+        continue;
+      }
+
+      const isSuccess = await uploadToCozeKb(
+          cozeApiKey,
+          cozeKbId,
+          filename,
+          content
+        );
+
+      if (isSuccess) {
+        this.emit('export:progress', i + 1);
+      }
+    }
+    await sleep(100);
+
+    
   }
 
   // 提取出 html 中的子资源，并保存在 resource-map 表中

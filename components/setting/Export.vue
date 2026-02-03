@@ -84,6 +84,49 @@
           label="导出 HTML 中包含留言数据"
         />
       </div>
+      <div class="mt-6 border-t pt-6">
+        <h3 class="text-lg font-medium mb-4">扣子Coze知识库配置</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 扣子API密钥 -->
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">API密钥（API Key）</label>
+            <UInput
+              v-model="preferences.exportConfig.cozeApiKey"
+              type="password"
+              placeholder="请输入扣子开放平台API Key"
+              class="w-full"
+            />
+          </div>
+          <!-- 扣子知识库ID -->
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">知识库ID</label>
+            <UInput
+              v-model="preferences.exportConfig.cozeKbId"
+              placeholder="请输入目标知识库ID"
+              class="w-full"
+            />
+          </div>
+          <!-- 是否覆盖已有文档 -->
+          <div class="md:col-span-2">
+            <UCheckbox
+              v-model="preferences.exportConfig.cozeCoverDoc"
+              label="导出时覆盖扣子平台同名文档（否则跳过）"
+            />
+          </div>
+          <!-- 文档标题前缀 -->
+          <div class="md:col-span-2">
+            <label class="block text-sm text-gray-600 mb-1">文档标题前缀（可选）</label>
+            <UInput
+              v-model="preferences.exportConfig.cozeTitlePrefix"
+              placeholder="例：【公众号文章】-，为空则直接使用文章标题"
+              class="w-full"
+            />
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          配置说明：API密钥和知识库ID可在<a href="https://www.coze.cn/open" target="_blank" class="text-blue-500">扣子开放平台</a>获取
+        </p>
+      </div>
     </div>
   </UCard>
 </template>
